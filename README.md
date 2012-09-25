@@ -13,6 +13,4 @@ Installation
 How to use
 ----------
 
-<pre>
 	<?php do_action('cupcake_like_button', get_the_ID(), 'class_name'); ?>
-</pre>
