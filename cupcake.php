@@ -16,14 +16,27 @@ define('CUPCAKE_DIR', plugin_dir_url(__FILE__));
 
 function cupcake_init()
 {
+	//Check if tables exist
+	cupcake_table();
+
+	wp_enqueue_script('like_post', CUPCAKE_DIR.'js/cupcake.js', array('jquery'));
+	wp_localize_script('like_post', 'cup_vars', array(
+		'ajaxurl' => admin_url('admin-ajax.php'),
+		'nonce' => wp_create_nonce('cupcake_nonce'),
+	));
+}
+
+function cupcake_table()
+{
 	global $wpdb;
 
 	$like_table = $wpdb->prefix.'cupcake_like';
+	$read_table = $wpdb->prefix.'cupcake_read';
 
 	//Verify table exists or not
 	if (is_null($wpdb->get_var("SHOW TABLES LIKE {$like_table}")))
 	{
-		$create_table = "CREATE TABLE {$like_table} (
+		$create_like_table = "CREATE TABLE {$like_table} (
 						id INT(11) NOT NULL AUTO_INCREMENT,
 						post_id INT(11) NOT NULL,
 						user_id INT(11) NOT NULL,
@@ -32,22 +45,33 @@ function cupcake_init()
 						INDEX(post_id)
 						) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
 
-		$wpdb->query($create_table);
+		$create_read_table = "CREATE TABLE {$read_table} (
+						id INT(11) NOT NULL AUTO_INCREMENT,
+						post_id INT(11) NOT NULL,
+						user_id INT(11) NOT NULL,
+						ip VARCHAR(100) NULL,
+						created_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+						PRIMARY KEY(id),
+						INDEX(post_id)
+						) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+
+		$wpdb->query($create_like_table);
+		$wpdb->query($create_read_table);
 	}
 
-	//Register table in wp database objects
+	//Register like table in wp database objects
 	if ( ! isset($wpdb->cupcake_like))
 	{
 		$wpdb->cupcake_like = $like_table;
-
 		$wpdb->tables[] = str_replace($wpdb->prefix, '', $like_table);
 	}
 
-	wp_enqueue_script('like_post', CUPCAKE_DIR.'js/cupcake.js', array('jquery'));
-	wp_localize_script('like_post', 'cup_vars', array(
-		'ajaxurl' => admin_url('admin-ajax.php'),
-		'nonce' => wp_create_nonce('cupcake_nonce'),
-	));
+	//Register read table in wp database objects
+	if ( ! isset($wpdb->cupcake_read))
+	{
+		$wpdb->cupcake_read = $read_table;
+		$wpdb->tables[] = str_replace($wpdb->prefix, '', $read_table);
+	}
 }
 
 function cupcake_like()
@@ -120,6 +144,16 @@ function cupcake_like_button($pid, $class = null, $tag = false)
 	}
 
 	echo $button;
+}
+
+function cupcake_read()
+{
+	global $wpdb;
+}
+
+function cupcake_read_button()
+{
+	global $wpdb;
 }
 
 add_action('init', 'cupcake_init');
