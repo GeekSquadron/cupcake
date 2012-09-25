@@ -46,12 +46,9 @@ function cupcake_init()
 	wp_enqueue_script('like_post', CUPCAKE_DIR.'js/cupcake.js', array('jquery'));
 	wp_localize_script('like_post', 'cup_vars', array(
 		'ajaxurl' => admin_url('admin-ajax.php'),
-		'nonce' => wp_create_nonce('cupcake_like_nonce'),
+		'nonce' => wp_create_nonce('cupcake_nonce'),
 	));
 }
-add_action('init', 'cupcake_init');
-add_action('wp_ajax_cupcake-like', 'cupcake_like');
-add_action('cupcake_like_button', 'cupcake_button');
 
 function cupcake_like()
 {
@@ -62,7 +59,7 @@ function cupcake_like()
 	$user_id = $user->ID;
 
 	$nonce = $_POST['nonce'];
-	if ( ! wp_verify_nonce($nonce, 'cupcake_like_nonce') || ! intval($_POST['pid']) || ! intval($user_id))
+	if ( ! wp_verify_nonce($nonce, 'cupcake_nonce') || ! intval($_POST['pid']) || ! intval($user_id))
 	{
 		echo "101";
 		die();
@@ -95,7 +92,7 @@ function cupcake_like()
 
 }
 
-function cupcake_button($pid)
+function cupcake_like_button($pid, $class = null, $tag = false)
 {
 	global $wpdb;
 
@@ -107,9 +104,31 @@ function cupcake_button($pid)
 	$likes = is_null($total) ? 0 : $total;
 
 	$exists = $wpdb->get_var("SELECT id FROM {$wpdb->cupcake_like} WHERE post_id = {$pid} AND user_id = {$user_id}");
-	$disabled = is_null($exists) ? '' : 'disabled=true';
 
-	$button = "<button id='{$pid}' class='cupcake-like' {$disabled}>{$likes}</button>";
+	$class_name = is_null($class) ? '' : is_array($class) ? implode(' ', $class) : $class;
+
+	$show_tag = ($tag != false) ? "{$likes} people like this" : $likes;
+
+	$disabled = is_null($exists) ? '' : 'disabled=true';
+	$button = "<button id='{$pid}' class='cupcake-like {$class_name}' {$disabled}>{$show_tag}</button>";
 
 	echo $button;
 }
+
+function cupcake_read()
+{
+	global $wpdb;
+
+	//Get current user
+	$user = wp_get_current_user();
+	$user_id = $user->ID;
+}
+
+function cupcake_read_button($pid, $class = null)
+{
+	global $wpdb;
+}
+
+add_action('init', 'cupcake_init');
+add_action('wp_ajax_cupcake-like', 'cupcake_like');
+add_action('cupcake_like_button', 'cupcake_like_button', 10, 3);
