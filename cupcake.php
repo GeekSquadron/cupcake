@@ -115,20 +115,6 @@ function cupcake_like_button($pid, $class = null, $tag = false)
 	echo $button;
 }
 
-function cupcake_read()
-{
-	global $wpdb;
-
-	//Get current user
-	$user = wp_get_current_user();
-	$user_id = $user->ID;
-}
-
-function cupcake_read_button($pid, $class = null)
-{
-	global $wpdb;
-}
-
 add_action('init', 'cupcake_init');
 add_action('wp_ajax_cupcake-like', 'cupcake_like');
 add_action('cupcake_like_button', 'cupcake_like_button', 10, 3);
