@@ -103,14 +103,21 @@ function cupcake_like_button($pid, $class = null, $tag = false)
 	$total = $wpdb->get_var("SELECT COUNT(id) AS total_like FROM {$wpdb->cupcake_like} WHERE post_id = {$pid}");
 	$likes = is_null($total) ? 0 : $total;
 
-	$exists = $wpdb->get_var("SELECT id FROM {$wpdb->cupcake_like} WHERE post_id = {$pid} AND user_id = {$user_id}");
+	if (intval($user_id))
+	{
+		$exists = $wpdb->get_var("SELECT id FROM {$wpdb->cupcake_like} WHERE post_id = {$pid} AND user_id = {$user_id}");
 
-	$class_name = is_null($class) ? '' : is_array($class) ? implode(' ', $class) : $class;
+		$class_name = is_null($class) ? '' : is_array($class) ? implode(' ', $class) : $class;
 
-	$show_tag = ($tag != false) ? "{$likes} people like this" : $likes;
+		$show_tag = ($tag != false) ? "{$likes} people like this" : $likes;
 
-	$disabled = is_null($exists) ? '' : 'disabled=true';
-	$button = "<button id='{$pid}' class='cupcake-like {$class_name}' {$disabled}>{$show_tag}</button>";
+		$disabled = is_null($exists) ? '' : 'disabled=true';
+		$button = "<button id='{$pid}' class='cupcake-like {$class_name}' {$disabled}>{$show_tag}</button>";
+	}
+	else
+	{
+		$button = "<p class='{$class_name}'>{$likes} likes this post</p>";
+	}
 
 	echo $button;
 }
