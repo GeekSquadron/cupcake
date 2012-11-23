@@ -43,7 +43,7 @@ function cupcake_init()
 		$wpdb->tables[] = str_replace($wpdb->prefix, '', $like_table);
 	}
 
-	wp_enqueue_script('like_post', CUPCAKE_DIR.'js/cupcake.js', array('jquery'));
+	wp_enqueue_script('like_post', CUPCAKE_DIR.'js/cupcake.js');
 	wp_localize_script('like_post', 'cup_vars', array(
 		'ajaxurl' => admin_url('admin-ajax.php'),
 		'nonce' => wp_create_nonce('cupcake_nonce'),
